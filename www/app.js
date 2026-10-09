@@ -48,6 +48,7 @@
     aligned: false,
     attached: false,
     nativeHandle: null,
+    nativeError: '',
     fatal: false,
     watchdog: 0,
     statusTimer: 0
@@ -139,15 +140,39 @@
 
   /* ---------- Native bridge (Android app built with Capacitor) ---------- */
 
-  function nativePlugin(name) {
+  const nativeCache = {};
+
+  function isNativeApp() {
     try {
       const cap = window.Capacitor;
-      if (cap && typeof cap.isNativePlatform === 'function' && cap.isNativePlatform() &&
-          cap.Plugins && cap.Plugins[name]) {
-        return cap.Plugins[name];
+      return !!(cap && typeof cap.isNativePlatform === 'function' && cap.isNativePlatform());
+    } catch (e) { return false; }
+  }
+
+  function nativePlugin(name) {
+    try {
+      if (!isNativeApp()) return null;
+      if (nativeCache[name]) return nativeCache[name];
+      const cap = window.Capacitor;
+      let plugin = null;
+      if (typeof cap.registerPlugin === 'function') {
+        try { plugin = cap.registerPlugin(name); } catch (e) { plugin = null; }
       }
-    } catch (e) { /* not running inside the native app */ }
-    return null;
+      if (!plugin && cap.Plugins && cap.Plugins[name]) plugin = cap.Plugins[name];
+      if (plugin) nativeCache[name] = plugin;
+      return plugin;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  function diagnostics() {
+    let text = 'تشخیص: ' + (isNativeApp() ? 'برنامه اندروید' : 'مرورگر');
+    if (isNativeApp()) {
+      text += '، پلاگین سنسور ' + (nativePlugin('NativeCompass') ? 'پیدا شد' : 'پیدا نشد');
+      if (state.nativeError) text += '، خطا: ' + state.nativeError;
+    }
+    return text;
   }
 
   /* ---------- Sensor input ---------- */
@@ -223,8 +248,10 @@
         state.nativeHandle = await compass.addListener('orientation', onNative);
       }
       const info = await compass.start();
+      if (!(info && info.available)) state.nativeError = 'سنسور جهت در این گوشی پیدا نشد';
       return !!(info && info.available);
     } catch (e) {
+      state.nativeError = String(e && e.message ? e.message : e).slice(0, 120);
       return false;
     }
   }
@@ -258,7 +285,7 @@
       } else {
         showFailure(
           'داده‌ای از سنسور نرسید',
-          'اجازه «حسگرهای حرکتی» را برای این سایت یا برنامه بررسی کنید و دوباره امتحان کنید.'
+          'اجازه «حسگرهای حرکتی» را برای این سایت یا برنامه بررسی کنید و دوباره امتحان کنید. (' + diagnostics() + ')'
         );
       }
     }, 3500);
