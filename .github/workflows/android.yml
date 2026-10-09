@@ -63,8 +63,22 @@ jobs:
         run: |
           cd android
           chmod +x gradlew
+
+          run_gradle() {
+            set +e
+            ./gradlew "$1" --no-daemon > "$RUNNER_TEMP/gradle.log" 2>&1
+            code=$?
+            set -e
+            tail -n 40 "$RUNNER_TEMP/gradle.log"
+            if [ "$code" -ne 0 ]; then
+              MSG=$(grep -E "error:|What went wrong|Execution failed|Caused by|Could not|not found" "$RUNNER_TEMP/gradle.log" | head -12 | tr '\n' '|' | cut -c1-1500)
+              echo "::error title=Gradle failed::${MSG}"
+              exit "$code"
+            fi
+          }
+
           if [ -n "$KEYSTORE_BASE64" ]; then
-            ./gradlew assembleRelease --no-daemon
+            run_gradle assembleRelease
             BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
             echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.keystore"
             "$BT/zipalign" -f -p 4 app/build/outputs/apk/release/app-release-unsigned.apk "$RUNNER_TEMP/aligned.apk"
@@ -72,7 +86,7 @@ jobs:
             "$BT/apksigner" verify ../compass.apk
           else
             echo "No signing key found, building a debug APK instead."
-            ./gradlew assembleDebug --no-daemon
+            run_gradle assembleDebug
             cp app/build/outputs/apk/debug/app-debug.apk ../compass.apk
           fi
 

@@ -13,6 +13,8 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import org.json.JSONException;
+
 /**
  * Reads the Android rotation-vector sensor directly and sends the rotation
  * matrix (device -> East/North/Up) to the web layer as "orientation" events.
@@ -97,8 +99,12 @@ public class NativeCompassPlugin extends Plugin implements SensorEventListener {
             return;
         }
         JSArray values = new JSArray();
-        for (float v : matrix) {
-            values.put((double) v);
+        try {
+            for (float v : matrix) {
+                values.put((double) v);
+            }
+        } catch (JSONException e) {
+            return;
         }
         JSObject data = new JSObject();
         data.put("matrix", values);
