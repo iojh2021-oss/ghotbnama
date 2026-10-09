@@ -1,0 +1,71 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Create Android project
+        run: npx cap add android
+
+      - name: Add location permissions and lock portrait
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          sed -i 's|<application|<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />\n    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />\n    <application|' "$MANIFEST"
+          sed -i 's|android:name=".MainActivity"|android:name=".MainActivity"\n            android:screenOrientation="portrait"|' "$MANIFEST"
+          cat "$MANIFEST"
+
+      - name: Use the app icon
+        run: |
+          for d in android/app/src/main/res/mipmap-*; do
+            for n in ic_launcher ic_launcher_round ic_launcher_foreground; do
+              if [ -f "$d/$n.png" ]; then
+                cp www/icons/icon-maskable-512.png "$d/$n.png"
+              fi
+            done
+          done
+
+      - name: Sync web files
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk compass.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compass-apk
+          path: compass.apk
+
+      - name: Attach APK to release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: compass.apk

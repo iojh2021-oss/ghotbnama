@@ -1,0 +1,21 @@
+{
+  "id": "./",
+  "name": "قطب‌نما",
+  "short_name": "قطب‌نما",
+  "description": "قطب‌نمای دقیق با جهت قبله. بدون اینترنت هم کار می‌کند.",
+  "lang": "fa",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A1B27",
+  "theme_color": "#0A1B27",
+  "categories": ["utilities", "navigation"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

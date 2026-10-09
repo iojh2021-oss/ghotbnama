@@ -1,0 +1,8 @@
+{
+  "appId": "io.github.compass.app",
+  "appName": "قطب‌نما",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}
