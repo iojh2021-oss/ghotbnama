@@ -1,4 +1,4 @@
-const VERSION = 'compass-v1';
+const VERSION = 'compass-v2';
 const ASSETS = [
   './',
   './index.html',

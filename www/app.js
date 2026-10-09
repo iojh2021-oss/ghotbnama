@@ -47,6 +47,7 @@
     qibla: null,
     aligned: false,
     attached: false,
+    nativeHandle: null,
     fatal: false,
     watchdog: 0,
     statusTimer: 0
@@ -136,6 +137,19 @@
     return M.norm(a);
   }
 
+  /* ---------- Native bridge (Android app built with Capacitor) ---------- */
+
+  function nativePlugin(name) {
+    try {
+      const cap = window.Capacitor;
+      if (cap && typeof cap.isNativePlatform === 'function' && cap.isNativePlatform() &&
+          cap.Plugins && cap.Plugins[name]) {
+        return cap.Plugins[name];
+      }
+    } catch (e) { /* not running inside the native app */ }
+    return null;
+  }
+
   /* ---------- Sensor input ---------- */
 
   function ingest(h) {
@@ -196,6 +210,25 @@
     }
   }
 
+  function onNative(e) {
+    state.gotAbs = true;
+    ingest(M.headingFromMatrix(e && e.matrix, screenAngle()));
+  }
+
+  async function startNative() {
+    const compass = nativePlugin('NativeCompass');
+    if (!compass) return false;
+    try {
+      if (!state.nativeHandle) {
+        state.nativeHandle = await compass.addListener('orientation', onNative);
+      }
+      const info = await compass.start();
+      return !!(info && info.available);
+    } catch (e) {
+      return false;
+    }
+  }
+
   function attach() {
     if (state.attached) return;
     state.attached = true;
@@ -246,12 +279,12 @@
       showFailure('اتصال امن لازم است', 'قطب‌نما فقط روی HTTPS یا localhost کار می‌کند.', 'بستن', true);
       return;
     }
-    if (!('DeviceOrientationEvent' in window)) {
+    if (!nativePlugin('NativeCompass') && !('DeviceOrientationEvent' in window)) {
       showFailure('سنسور پشتیبانی نمی‌شود', 'این مرورگر به سنسور جهت دسترسی نمی‌دهد. Chrome را امتحان کنید.', 'بستن', true);
       return;
     }
     try {
-      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+      if ('DeviceOrientationEvent' in window && typeof DeviceOrientationEvent.requestPermission === 'function') {
         const result = await DeviceOrientationEvent.requestPermission();
         if (result !== 'granted') {
           showFailure('دسترسی رد شد', 'اجازه دسترسی به حرکت و جهت را بدهید. اگر پنجره دیگر نمایش داده نشد، مرورگر را کامل ببندید و دوباره باز کنید.');
@@ -263,7 +296,8 @@
       return;
     }
     el.overlay.hidden = true;
-    attach();
+    const usingNative = await startNative();
+    if (!usingNative) attach();
     keepAwake();
     armWatchdog();
   }
@@ -347,7 +381,25 @@
     setText(el.btnLocate, 'به‌روزرسانی موقعیت');
   }
 
+  async function locateNative(geo) {
+    try {
+      try { await geo.requestPermissions({ permissions: ['location'] }); } catch (e) { /* asked again below */ }
+      const p = await geo.getCurrentPosition({ enableHighAccuracy: false, timeout: 20000, maximumAge: 600000 });
+      onPosition(p);
+    } catch (e) {
+      const text = String(e && e.message ? e.message : e).toLowerCase();
+      onPositionError({ code: text.indexOf('denied') !== -1 || text.indexOf('permission') !== -1 ? 1 : 2 });
+    }
+  }
+
   function locate() {
+    const geo = nativePlugin('Geolocation');
+    if (geo) {
+      el.btnLocate.disabled = true;
+      el.btnLocate.textContent = 'در حال تعیین موقعیت…';
+      locateNative(geo);
+      return;
+    }
     if (!('geolocation' in navigator)) {
       showStatus('این دستگاه موقعیت‌یابی را پشتیبانی نمی‌کند.', 6000);
       return;

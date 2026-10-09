@@ -17,24 +17,13 @@
     return ((norm(to - from) + 180) % 360) - 180;
   }
 
-  /* Heading (0 = north, clockwise) of the direction the screen's top edge points,
-     blended with the direction the back of the phone faces, so it stays stable
-     both when the phone is flat and when it is held upright.
-     alpha/beta/gamma: W3C DeviceOrientation angles in degrees (absolute).
+  /* Heading (0 = north, clockwise) from the device axes expressed in the earth
+     frame (East, North). Blends the direction of the screen's top edge with the
+     direction the back of the phone faces, so it stays stable both when the phone
+     is flat and when it is held upright.
+     Xe, Ye, Ze: [east, north] components of the device X, Y, Z axes.
      screenAngle: screen.orientation.angle (0, 90, 180, 270). */
-  function headingFromEuler(alpha, beta, gamma, screenAngle) {
-    var z = (alpha || 0) * RAD;
-    var x = (beta || 0) * RAD;
-    var y = (gamma || 0) * RAD;
-    var cZ = Math.cos(z), sZ = Math.sin(z);
-    var cX = Math.cos(x), sX = Math.sin(x);
-    var cY = Math.cos(y), sY = Math.sin(y);
-
-    /* Device axes expressed in the earth frame (East, North, Up). */
-    var Xe = [cZ * cY - sZ * sX * sY, sZ * cY + cZ * sX * sY];
-    var Ye = [-sZ * cX, cZ * cX];
-    var Ze = [cZ * sY + sZ * sX * cY, sZ * sY - cZ * sX * cY];
-
+  function headingFromAxes(Xe, Ye, Ze, screenAngle) {
     var a = norm(screenAngle || 0);
     var up;
     if (a === 90) up = Xe;
@@ -47,6 +36,28 @@
     var vy = up[1] - Ze[1];
     if (Math.hypot(vx, vy) < 0.1) return null; /* screen facing down / ambiguous */
     return norm(Math.atan2(vx, vy) / RAD);
+  }
+
+  /* From W3C DeviceOrientation angles in degrees (absolute). */
+  function headingFromEuler(alpha, beta, gamma, screenAngle) {
+    var z = (alpha || 0) * RAD;
+    var x = (beta || 0) * RAD;
+    var y = (gamma || 0) * RAD;
+    var cZ = Math.cos(z), sZ = Math.sin(z);
+    var cX = Math.cos(x), sX = Math.sin(x);
+    var cY = Math.cos(y), sY = Math.sin(y);
+
+    var Xe = [cZ * cY - sZ * sX * sY, sZ * cY + cZ * sX * sY];
+    var Ye = [-sZ * cX, cZ * cX];
+    var Ze = [cZ * sY + sZ * sX * cY, sZ * sY - cZ * sX * cY];
+    return headingFromAxes(Xe, Ye, Ze, screenAngle);
+  }
+
+  /* From a row-major 3x3 rotation matrix as returned by Android's
+     SensorManager.getRotationMatrixFromVector (device -> East/North/Up). */
+  function headingFromMatrix(R, screenAngle) {
+    if (!R || R.length < 9) return null;
+    return headingFromAxes([R[0], R[3]], [R[1], R[4]], [R[2], R[5]], screenAngle);
   }
 
   /* Initial great-circle bearing from point 1 to point 2, degrees from true north. */
@@ -70,6 +81,7 @@
     norm: norm,
     signedDiff: signedDiff,
     headingFromEuler: headingFromEuler,
+    headingFromMatrix: headingFromMatrix,
     bearingTo: bearingTo,
     distanceKm: distanceKm
   };
