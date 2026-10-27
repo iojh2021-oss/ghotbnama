@@ -1,10 +1,15 @@
-const VERSION = 'compass-v3';
+const VERSION = 'compass-v4';
 const ASSETS = [
   './',
   './index.html',
   './style.css',
   './math.js',
   './app.js',
+  './sky.html',
+  './sky.css',
+  './sky-core.js',
+  './sky-data.js',
+  './sky.js',
   './manifest.webmanifest',
   './icons/icon.svg',
   './icons/icon-192.png',
@@ -33,14 +38,16 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   if (req.mode === 'navigate') {
+    // هر صفحه کلید کش خودش را دارد تا آسمان‌نما جای قطب‌نما ننشیند
+    const page = url.pathname.endsWith('/sky.html') ? './sky.html' : './index.html';
     event.respondWith(
       fetch(req)
         .then((res) => {
           const copy = res.clone();
-          caches.open(VERSION).then((cache) => cache.put('./index.html', copy));
+          caches.open(VERSION).then((cache) => cache.put(page, copy));
           return res;
         })
-        .catch(() => caches.match('./index.html'))
+        .catch(() => caches.match(page))
     );
     return;
   }

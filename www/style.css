@@ -84,6 +84,8 @@ button, input { font: inherit; color: inherit; }
 }
 
 .icon-btn:active { background: var(--panel); color: var(--ink); }
+a.icon-btn { text-decoration: none; }
+#btnSky { color: var(--gold); }
 
 /* Buttons */
 .btn {
