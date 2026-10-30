@@ -365,3 +365,26 @@ window.SKY_DATA = {
     ["Galactic Center", "مرکز کهکشان راه‌شیری", "17 45.7", "-29 00", 99, "center", 1.0]
   ]
 };
+
+/* همهٔ ۸۸ صورت فلکی رسمی IAU: [نام لاتین، نام فارسی]
+ * نام فارسی صورت‌های فلکی کم‌نورِ جنوبی قراردادی است و ممکن است با منابع دیگر کمی فرق کند. */
+window.SKY_DATA.conAll = {
+  And: ["Andromeda", "مرأةالمسلسله"], Ant: ["Antlia", "مضخّه"], Aps: ["Apus", "مرغ بهشتی"], Aqr: ["Aquarius", "دلو"], Aql: ["Aquila", "عقاب"],
+  Ara: ["Ara", "مجمره"], Ari: ["Aries", "حمل"], Aur: ["Auriga", "ممسک‌الاعنّه"], Boo: ["Boötes", "عوّاء"], Cae: ["Caelum", "اسکنه"],
+  Cam: ["Camelopardalis", "زرافه"], Cnc: ["Cancer", "سرطان"], CVn: ["Canes Venatici", "کلاب صیاد"], CMa: ["Canis Major", "کلب اکبر"], CMi: ["Canis Minor", "کلب اصغر"],
+  Cap: ["Capricornus", "جدی"], Car: ["Carina", "کیل"], Cas: ["Cassiopeia", "ذات‌الکرسی"], Cen: ["Centaurus", "قنطورس"], Cep: ["Cepheus", "قیفاووس"],
+  Cet: ["Cetus", "قیطس"], Cha: ["Chamaeleon", "آفتاب‌پرست"], Cir: ["Circinus", "پرگار"], Col: ["Columba", "حمامه"], Com: ["Coma Berenices", "گیسوی برنیس"],
+  CrA: ["Corona Australis", "اکلیل جنوبی"], CrB: ["Corona Borealis", "اکلیل شمالی"], Crv: ["Corvus", "غراب"], Crt: ["Crater", "باطیه"], Cru: ["Crux", "صلیب جنوبی"],
+  Cyg: ["Cygnus", "دجاجه"], Del: ["Delphinus", "دلفین"], Dor: ["Dorado", "ماهی زرین"], Dra: ["Draco", "تنین"], Equ: ["Equuleus", "فرس صغیر"],
+  Eri: ["Eridanus", "نهر"], For: ["Fornax", "کوره"], Gem: ["Gemini", "جوزا"], Gru: ["Grus", "کرکی"], Her: ["Hercules", "جاثی"],
+  Hor: ["Horologium", "ساعت"], Hya: ["Hydra", "شجاع"], Hyi: ["Hydrus", "مار آبی"], Ind: ["Indus", "هندی"], Lac: ["Lacerta", "سحلیه"],
+  Leo: ["Leo", "اسد"], LMi: ["Leo Minor", "اسد صغیر"], Lep: ["Lepus", "ارنب"], Lib: ["Libra", "میزان"], Lup: ["Lupus", "ذئب"],
+  Lyn: ["Lynx", "وشق"], Lyr: ["Lyra", "شلیاق"], Men: ["Mensa", "میز"], Mic: ["Microscopium", "ریزبین"], Mon: ["Monoceros", "وحیدالقرن"],
+  Mus: ["Musca", "مگس"], Nor: ["Norma", "گونیا"], Oct: ["Octans", "ثُمن"], Oph: ["Ophiuchus", "حوّاء"], Ori: ["Orion", "جبار"],
+  Pav: ["Pavo", "طاووس"], Peg: ["Pegasus", "فرس اعظم"], Per: ["Perseus", "برشاووش"], Phe: ["Phoenix", "ققنوس"], Pic: ["Pictor", "نقاش"],
+  Psc: ["Pisces", "حوت"], PsA: ["Piscis Austrinus", "حوت جنوبی"], Pup: ["Puppis", "مؤخرالسفینه"], Pyx: ["Pyxis", "بیت‌الابره"], Ret: ["Reticulum", "شبکه"],
+  Sge: ["Sagitta", "سهم"], Sgr: ["Sagittarius", "قوس"], Sco: ["Scorpius", "عقرب"], Scl: ["Sculptor", "نحّات"], Sct: ["Scutum", "ترس"],
+  Ser: ["Serpens", "حیّه"], Sex: ["Sextans", "سدس"], Tau: ["Taurus", "ثور"], Tel: ["Telescopium", "دوربین"], Tri: ["Triangulum", "مثلث"],
+  TrA: ["Triangulum Australe", "مثلث جنوبی"], Tuc: ["Tucana", "طوقان"], UMa: ["Ursa Major", "دب اکبر"], UMi: ["Ursa Minor", "دب اصغر"], Vel: ["Vela", "قلع"],
+  Vir: ["Virgo", "سنبله"], Vol: ["Volans", "سمک طیّار"], Vul: ["Vulpecula", "ثعلب"]
+};

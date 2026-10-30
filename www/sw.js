@@ -1,4 +1,4 @@
-const VERSION = 'compass-v4';
+const VERSION = 'compass-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,8 @@ const ASSETS = [
   './sky.css',
   './sky-core.js',
   './sky-data.js',
+  './sky-catalog.js',
+  './sky-chart.js',
   './sky.js',
   './manifest.webmanifest',
   './icons/icon.svg',

@@ -196,5 +196,31 @@
     return [rev((raG + Math.atan2(y, x)) * R2D), dec * R2D];
   }
 
-  return { D2R, R2D, rev, jdFromMs, dayNum, gmst, precess, eqToEnu, enuToAltAz, altAzToEnu, eclToEq, obliquity, sun, moon, planet, riseSet, qibla, galToEq };
+
+  /* ---------- ماتریس‌ها: سرعت بالا برای هزاران ستاره ---------- */
+  const mat = {
+    mul(A, B) { const o = []; for (let i = 0; i < 3; i++) { o.push([0, 0, 0]); for (let j = 0; j < 3; j++) o[i][j] = A[i][0] * B[0][j] + A[i][1] * B[1][j] + A[i][2] * B[2][j]; } return o; },
+    vec(A, v) { return [A[0][0] * v[0] + A[0][1] * v[1] + A[0][2] * v[2], A[1][0] * v[0] + A[1][1] * v[1] + A[1][2] * v[2], A[2][0] * v[0] + A[2][1] * v[1] + A[2][2] * v[2]]; },
+    tr(A) { return [[A[0][0], A[1][0], A[2][0]], [A[0][1], A[1][1], A[2][1]], [A[0][2], A[1][2], A[2][2]]]; }
+  };
+  const rz = a => { const c = Math.cos(a), s = Math.sin(a); return [[c, -s, 0], [s, c, 0], [0, 0, 1]]; };
+  const ry = a => { const c = Math.cos(a), s = Math.sin(a); return [[c, 0, s], [0, 1, 0], [-s, 0, c]]; };
+  // بردار یکهٔ استوایی از ra/dec (درجه)
+  function eqVec(raDeg, decDeg) { const a = raDeg * D2R, d = decDeg * D2R, cd = Math.cos(d); return [cd * Math.cos(a), cd * Math.sin(a), Math.sin(d)]; }
+  function vecEq(v) { return [rev(Math.atan2(v[1], v[0]) * R2D), Math.asin(Math.max(-1, Math.min(1, v[2]))) * R2D]; }
+  // تقدیم اعتدالین: J2000 -> تاریخ jd (همان زاویه‌های precess)
+  function precessMatrix(jd) {
+    const T = (jd - 2451545.0) / 36525;
+    const ze = (2306.2181 * T + 0.30188 * T * T) / 3600 * D2R;
+    const z = (2306.2181 * T + 1.09468 * T * T) / 3600 * D2R;
+    const th = (2004.3109 * T - 0.42665 * T * T) / 3600 * D2R;
+    return mat.mul(rz(z), mat.mul(ry(-th), rz(ze)));
+  }
+  // استوایی -> افقی (شرق، شمال، بالا) برای زمان نجومی محلی lst و عرض lat
+  function eqToEnuMatrix(lstDeg, latDeg) {
+    const L = lstDeg * D2R, p = latDeg * D2R, sL = Math.sin(L), cL = Math.cos(L), sp = Math.sin(p), cp = Math.cos(p);
+    return [[-sL, cL, 0], [-sp * cL, -sp * sL, cp], [cp * cL, cp * sL, sp]];
+  }
+
+  return { mat, eqVec, vecEq, precessMatrix, eqToEnuMatrix, D2R, R2D, rev, jdFromMs, dayNum, gmst, precess, eqToEnu, enuToAltAz, altAzToEnu, eclToEq, obliquity, sun, moon, planet, riseSet, qibla, galToEq };
 });
